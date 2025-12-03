@@ -1,65 +1,155 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import FileUpload from './components/FileUpload';
+import FactorInput from './components/FactorInput';
+import DataPreview from './components/DataPreview';
+import Heatmap from './components/Heatmap';
+import {
+  parseCSV,
+  validateData,
+  processData,
+  generateCSV,
+  DEFAULT_FACTORS,
+  DEFAULT_FACTOR_SEQUENCE,
+  ProcessingResult,
+  extractDilutionColumns
+} from './utils/csvProcessor';
+import { Download, AlertCircle } from 'lucide-react';
 
 export default function Home() {
+  const [rawFile, setRawFile] = useState<File | null>(null);
+  const [rawData, setRawData] = useState<any[] | null>(null);
+  const [factors, setFactors] = useState<Record<string, number>>(DEFAULT_FACTORS);
+  const [processedData, setProcessedData] = useState<ProcessingResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleFileSelect = async (file: File) => {
+    setError(null);
+    setRawFile(file);
+    setIsProcessing(true);
+    try {
+      const data = await parseCSV(file);
+      const validation = validateData(data);
+      if (!validation.valid) {
+        setError(validation.message || 'Invalid CSV file.');
+        setRawData(null);
+        setProcessedData(null);
+      } else {
+        setRawData(data);
+
+        // Extract columns and initialize factors with sequential defaults
+        const columns = extractDilutionColumns(data);
+        const newFactors: Record<string, number> = {};
+
+        columns.forEach((col, index) => {
+          // Use sequential default values, cycling if more than 6 columns
+          const defaultValue = DEFAULT_FACTOR_SEQUENCE[index % DEFAULT_FACTOR_SEQUENCE.length];
+          newFactors[col] = defaultValue;
+        });
+
+        setFactors(newFactors);
+
+        // Auto-process on upload with new factors
+        const result = processData(data, newFactors);
+        setProcessedData(result);
+      }
+    } catch (err) {
+      setError('Failed to parse CSV file.');
+      console.error(err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleFactorChange = useCallback((key: string, value: number) => {
+    setFactors((prev) => {
+      const newFactors = { ...prev, [key]: value };
+      return newFactors;
+    });
+  }, []);
+
+  // Re-process when factors or rawData change
+  useEffect(() => {
+    if (rawData) {
+      const result = processData(rawData, factors);
+      setProcessedData(result);
+    }
+  }, [rawData, factors]);
+
+  const handleDownload = () => {
+    if (!processedData) return;
+    const csvContent = generateCSV(processedData.tableData);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'final_map.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <header className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900">Fluorescence Spectroscopy Heatmap Tool</h1>
+          <p className="mt-2 text-gray-600">Upload your CSV, adjust correction factors, and generate a heatmap.</p>
+        </header>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-md flex items-center">
+            <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
+        {/* File Upload */}
+        <section>
+          <FileUpload onFileSelect={handleFileSelect} />
+          {rawFile && !error && (
+            <p className="mt-2 text-sm text-green-600 text-center">
+              File loaded: <span className="font-medium">{rawFile.name}</span>
+            </p>
+          )}
+        </section>
+
+        {/* Main Content Area - Only shown after upload */}
+        {processedData && (
+          <>
+            {/* Correction Factors (left) and Heatmap (right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Correction Factors - Takes up 1 column */}
+              <div className="lg:col-span-1">
+                <FactorInput factors={factors} onChange={handleFactorChange} />
+              </div>
+
+              {/* Heatmap - Takes up 3 columns */}
+              <div className="lg:col-span-3">
+                <Heatmap data={processedData.heatmapData} />
+              </div>
+            </div>
+
+            {/* Data Preview with Download Button */}
+            <section className="relative">
+              <div className="absolute top-4 right-4 z-10">
+                <button
+                  onClick={handleDownload}
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download CSV
+                </button>
+              </div>
+              <DataPreview data={processedData.tableData} />
+            </section>
+          </>
+        )}
+      </div>
     </div>
   );
 }
