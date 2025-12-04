@@ -26,6 +26,7 @@ export default function Heatmap({ data }: HeatmapProps) {
                             z: data.z,
                             type: 'contour',
                             colorscale: 'Jet',
+                            connectgaps: true, // Fill gaps in the data
                             contours: {
                                 coloring: 'heatmap',
                                 showlabels: true,
@@ -64,7 +65,7 @@ export default function Heatmap({ data }: HeatmapProps) {
                             title: { text: 'Emission (Em)' },
                             showgrid: false,
                         },
-                        plot_bgcolor: '#000033',
+                        plot_bgcolor: 'white',
                         paper_bgcolor: 'white',
                     }}
                     useResizeHandler={true}

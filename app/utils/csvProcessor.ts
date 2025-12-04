@@ -36,18 +36,91 @@ export const DEFAULT_FACTORS: Record<string, number> = {
     '18u512': 1.0,
 };
 
+// Helper to parse numbers with both comma and period decimal separators
+// Also handles thousands separators
+const parseNumber = (value: any): number => {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+
+        const hasComma = trimmed.includes(',');
+        const hasPeriod = trimmed.includes('.');
+
+        let normalized: string;
+
+        if (hasComma && hasPeriod) {
+            // Both comma and period present
+            // Determine which is the decimal separator by position
+            const lastCommaIndex = trimmed.lastIndexOf(',');
+            const lastPeriodIndex = trimmed.lastIndexOf('.');
+
+            if (lastCommaIndex > lastPeriodIndex) {
+                // Comma appears after period
+                // Check digits after comma to determine if it's decimal or thousands separator
+                const digitsAfterComma = trimmed.length - lastCommaIndex - 1;
+
+                if (digitsAfterComma === 3) {
+                    // Exactly 3 digits after comma = thousands separator
+                    // "1.234,567" with 3 digits = 1234567 (European thousands)
+                    normalized = trimmed.replace(/\./g, '').replace(/,/g, '');
+                } else {
+                    // Less than 3 digits = decimal separator
+                    // "1.234,56" = 1234.56 (European decimal)
+                    normalized = trimmed.replace(/\./g, '').replace(',', '.');
+                }
+            } else {
+                // Period appears after comma = period is decimal, comma is thousands
+                // "1,234.56" -> remove commas
+                normalized = trimmed.replace(/,/g, '');
+            }
+        } else if (hasComma) {
+            // Only comma present
+            // Check if it's thousands separator or decimal separator
+            const lastCommaIndex = trimmed.lastIndexOf(',');
+            const digitsAfterComma = trimmed.length - lastCommaIndex - 1;
+
+            // Count total commas to help determine format
+            const commaCount = (trimmed.match(/,/g) || []).length;
+
+            if (digitsAfterComma === 3 && commaCount >= 1) {
+                // Exactly 3 digits after last comma = likely thousands separator
+                // "-185,789" = -185789
+                // "1,234,567" = 1234567
+                normalized = trimmed.replace(/,/g, '');
+            } else {
+                // Not exactly 3 digits = decimal separator
+                // "246,67" = 246.67
+                normalized = trimmed.replace(',', '.');
+            }
+        } else {
+            // No comma, use as-is
+            normalized = trimmed;
+        }
+
+        const parsed = parseFloat(normalized);
+        return isNaN(parsed) ? NaN : parsed;
+    }
+    return NaN;
+};
+
 export const parseCSV = (file: File): Promise<any[]> => {
     return new Promise((resolve, reject) => {
         Papa.parse(file, {
             header: true,
-            dynamicTyping: true,
+            dynamicTyping: false, // Disable auto-typing to handle custom decimal formats
             skipEmptyLines: true,
+            delimiter: '', // Auto-detect delimiter (handles both , and ; delimiters)
+            transform: (value: string, field: string | number): any => {
+                // Try to parse as number (handles both comma and period decimals)
+                const num = parseNumber(value);
+                return isNaN(num) ? value : num;
+            },
             complete: (results) => {
                 resolve(results.data);
             },
             error: (error) => {
                 reject(error);
-            },
+            }
         });
     });
 };
