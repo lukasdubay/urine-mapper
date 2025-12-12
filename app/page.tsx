@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import FileUpload from './components/FileUpload';
 import FactorInput from './components/FactorInput';
 import DataPreview from './components/DataPreview';
 import Heatmap from './components/Heatmap';
+import ColorScaleControl, { ColorScaleConfig } from './components/ColorScaleControl';
 import {
   parseCSV,
   validateData,
@@ -13,29 +14,36 @@ import {
   DEFAULT_FACTORS,
   DEFAULT_FACTOR_SEQUENCE,
   ProcessingResult,
-  extractDilutionColumns
+  extractDilutionColumns,
+  calculateAutoMaxF
 } from './utils/csvProcessor';
 import { Download, AlertCircle } from 'lucide-react';
 
 export default function Home() {
   const [rawFile, setRawFile] = useState<File | null>(null);
-  const [rawData, setRawData] = useState<any[] | null>(null);
+  const [rawData, setRawData] = useState<Record<string, string | number>[] | null>(null);
   const [factors, setFactors] = useState<Record<string, number>>(DEFAULT_FACTORS);
-  const [processedData, setProcessedData] = useState<ProcessingResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Color scale configuration state
+  const [colorScaleConfig, setColorScaleConfig] = useState<ColorScaleConfig>({
+    mode: 'AUTO',
+    manualMaxF: null,
+    manualSteps: null,
+  });
+  
+  // Debounce timer ref for MaxF input
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleFileSelect = async (file: File) => {
     setError(null);
     setRawFile(file);
-    setIsProcessing(true);
     try {
       const data = await parseCSV(file);
       const validation = validateData(data);
       if (!validation.valid) {
         setError(validation.message || 'Invalid CSV file.');
         setRawData(null);
-        setProcessedData(null);
       } else {
         setRawData(data);
 
@@ -50,16 +58,10 @@ export default function Home() {
         });
 
         setFactors(newFactors);
-
-        // Auto-process on upload with new factors
-        const result = processData(data, newFactors);
-        setProcessedData(result);
       }
     } catch (err) {
       setError('Failed to parse CSV file.');
       console.error(err);
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -70,13 +72,40 @@ export default function Home() {
     });
   }, []);
 
-  // Re-process when factors or rawData change
-  useEffect(() => {
+  // Calculate processed data when factors or rawData change
+  const processedData = useMemo(() => {
     if (rawData) {
-      const result = processData(rawData, factors);
-      setProcessedData(result);
+      return processData(rawData, factors);
     }
+    return null;
   }, [rawData, factors]);
+
+  // Handle color scale config changes with debouncing for MaxF
+  const handleColorScaleChange = useCallback((newConfig: ColorScaleConfig) => {
+    // Clear existing debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Check if only MaxF changed (needs debouncing)
+    const onlyMaxFChanged = 
+      newConfig.mode === colorScaleConfig.mode &&
+      newConfig.manualSteps === colorScaleConfig.manualSteps &&
+      newConfig.manualMaxF !== colorScaleConfig.manualMaxF;
+
+    if (onlyMaxFChanged) {
+      // Debounce MaxF changes
+      debounceTimerRef.current = setTimeout(() => {
+        setColorScaleConfig(newConfig);
+      }, 300);
+    } else {
+      // Immediate update for mode and steps changes
+      setColorScaleConfig(newConfig);
+    }
+  }, [colorScaleConfig]);
+
+  // Calculate current auto MaxF for display
+  const currentAutoMaxF = processedData ? calculateAutoMaxF(processedData.heatmapData) : 0;
 
   const handleDownload = () => {
     if (!processedData) return;
@@ -127,9 +156,14 @@ export default function Home() {
                 <FactorInput factors={factors} onChange={handleFactorChange} />
               </div>
 
-              {/* Heatmap - Takes up 3 columns */}
-              <div className="lg:col-span-3">
-                <Heatmap data={processedData.heatmapData} />
+              {/* Heatmap with Color Scale Control - Takes up 3 columns */}
+              <div className="lg:col-span-3 space-y-4">
+                <Heatmap data={processedData.heatmapData} colorScaleConfig={colorScaleConfig} />
+                <ColorScaleControl
+                  config={colorScaleConfig}
+                  onChange={handleColorScaleChange}
+                  currentAutoMaxF={currentAutoMaxF}
+                />
               </div>
             </div>
 

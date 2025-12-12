@@ -230,3 +230,10 @@ export const generateCSV = (data: ProcessedRow[]): string => {
     const rows = data.map(row => `${row.Ex},${row.Em},${row.MaxF}`).join('\n');
     return header + rows;
 };
+
+export const calculateAutoMaxF = (data: HeatmapData): number => {
+    if (!data.z || data.z.length === 0) return 100;
+    const flatValues = data.z.flat();
+    return Math.max(...flatValues);
+};
+
