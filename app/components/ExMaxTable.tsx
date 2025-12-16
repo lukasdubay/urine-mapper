@@ -37,13 +37,13 @@ export default function ExMaxTable({ peaks }: ExMaxTableProps) {
           <tbody className="bg-white divide-y divide-gray-200">
             {peaks.map((peak, index) => (
               <tr key={index}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                   {peak.Ex}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                   {peak.Em}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                   {peak.MaxF.toFixed(2)}
                 </td>
               </tr>

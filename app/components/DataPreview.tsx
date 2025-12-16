@@ -28,9 +28,9 @@ export default function DataPreview({ data }: DataPreviewProps) {
                     <tbody className="bg-white divide-y divide-gray-200">
                         {data.map((row, index) => (
                             <tr key={index} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.Ex}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.Em}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.MaxF.toFixed(2)}</td>
+                                <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">{row.Ex}</td>
+                                <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">{row.Em}</td>
+                                <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">{row.MaxF.toFixed(2)}</td>
                             </tr>
                         ))}
                     </tbody>
