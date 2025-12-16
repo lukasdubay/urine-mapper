@@ -13,13 +13,13 @@ import {
   generateCSV,
   DEFAULT_FACTORS,
   DEFAULT_FACTOR_SEQUENCE,
-  ProcessingResult,
   extractDilutionColumns,
   calculateAutoMaxF
 } from './utils/csvProcessor';
 import { detectExMaxPeaks } from './utils/peakDetection';
 import ExMaxTable from './components/ExMaxTable';
 import ExMaxChart from './components/ExMaxChart';
+import ExMaxCurveDataPreview from './components/ExMaxCurveDataPreview';
 import { Download, AlertCircle } from 'lucide-react';
 
 export default function Home() {
@@ -184,12 +184,15 @@ export default function Home() {
                 <ExMaxTable peaks={peaks} />
               </div>
 
+              {/* EX Max Curve Data Preview */}
+              <ExMaxCurveDataPreview data={exMaxSeries} />
+
               {/* Processed Data Preview with Download Button */}
               <section className="relative">
                 <div className="absolute top-4 right-4 z-10">
                   <button
                     onClick={handleDownload}
-                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
+                    className="flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download CSV

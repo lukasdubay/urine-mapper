@@ -13,10 +13,10 @@ export default function DataPreview({ data }: DataPreviewProps) {
     return (
         <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="p-4 border-b border-gray-200 bg-gray-50">
-                <h3 className="text-lg font-normal text-gray-800">Processed Data Preview</h3>
+                <h3 className="text-lg font-normal text-gray-800">All Processed Data</h3>
                 <p className="text-sm text-gray-500">Showing all {data.length} rows</p>
             </div>
-            <div className="overflow-auto max-h-[500px]">
+            <div className="overflow-auto max-h-[400px]">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50 sticky top-0">
                         <tr>
