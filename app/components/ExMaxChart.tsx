@@ -22,7 +22,7 @@ export default function ExMaxChart({ exMaxSeries, peaks }: ExMaxChartProps) {
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
-      <h3 className="text-lg font-medium text-gray-900 mb-4 px-2">Excitation Maxima Curve</h3>
+      <h3 className="text-lg font-regular text-gray-900 mb-4 px-2">Excitation Maxima Curve</h3>
       <div className="w-full h-[400px]">
         <Plot
           data={[

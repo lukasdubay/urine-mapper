@@ -71,7 +71,7 @@ export default function ColorScaleControl({ config, onChange, currentAutoMaxF }:
 
     return (
         <div className="bg-white rounded-lg">
-            <h3 className="text-base font-semibold mb-4 text-gray-800">Color Scale</h3>
+            <h3 className="text-base font-normal mb-4 text-gray-800">Color Scale</h3>
 
             {/* Radio Group */}
             <div className="flex flex-col space-y-2 mb-4">

@@ -10,7 +10,7 @@ interface FactorInputProps {
 export default function FactorInput({ factors, onChange }: FactorInputProps) {
     return (
         <div className="bg-white rounded-lg h-full">
-            <h3 className="text-base font-semibold mb-4 text-gray-800">Correction Factors</h3>
+            <h3 className="text-base font-normal mb-4 text-gray-800">Correction Factors</h3>
             <div className="space-y-3">
                 {Object.entries(factors).map(([key, value]) => (
                     <div key={key} className="flex flex-col">

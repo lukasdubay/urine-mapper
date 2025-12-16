@@ -133,10 +133,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <header className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Urine Fluorescence Heatmap</h1>
+          <h1 className="text-4xl font-semibold text-gray-900">Urine Fluorescence Heatmap</h1>
         </header>
 
         {/* Error Message */}
@@ -163,7 +163,7 @@ export default function Home() {
             {/* Left Sidebar - Settings */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow p-4 space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
+                <h2 className="text-lg font-normal text-gray-900">Settings</h2>
                 <FactorInput factors={factors} onChange={handleFactorChange} />
                 <ColorScaleControl
                   config={colorScaleConfig}
