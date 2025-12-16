@@ -70,8 +70,8 @@ export default function Heatmap({ data, colorScaleConfig }: HeatmapProps) {
     if (!data || !data.z || data.z.length === 0) return null;
 
     return (
-        <div className="bg-white p-4 rounded-lg w-full h-[600px] overflow-hidden">
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">Fluorescence Contour Map</h3>
+        <div className="bg-white p-4 rounded-lg shadow w-full h-[600px] overflow-hidden">
+            <h3 className="text-lg font-normal mb-4 text-gray-800">Fluorescence Contour Map</h3>
             <div className="w-full h-[calc(100%-2.5rem)]">
                 <Plot
                     data={[

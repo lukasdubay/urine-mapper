@@ -47,8 +47,8 @@ export default function FileUpload({ onFileSelect }: FileUploadProps) {
                 id="file-upload"
             />
             <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
-                <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                <span className="text-lg font-medium text-gray-700">
+                <Upload className="w-8 h-8 text-gray-400 mb-4" />
+                <span className="text-base font-normal text-gray-700">
                     Drop your CSV file here, or click to browse
                 </span>
                 <span className="text-sm text-gray-500 mt-2">

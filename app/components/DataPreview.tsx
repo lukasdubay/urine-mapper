@@ -11,9 +11,9 @@ export default function DataPreview({ data }: DataPreviewProps) {
     if (!data || data.length === 0) return null;
 
     return (
-        <div className="bg-white rounded-lg overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="p-4 border-b border-gray-200 bg-gray-50">
-                <h3 className="text-lg font-semibold text-gray-800">Processed Data Preview</h3>
+                <h3 className="text-lg font-normal text-gray-800">Processed Data Preview</h3>
                 <p className="text-sm text-gray-500">Showing all {data.length} rows</p>
             </div>
             <div className="overflow-auto max-h-[500px]">
