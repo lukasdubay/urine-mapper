@@ -30,7 +30,7 @@ export default function ExMaxCurveDataPreview({ data }: ExMaxCurveDataPreviewPro
 
     return (
         <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                 <div>
                     <h3 className="text-lg font-normal text-gray-800">Excitation Maxima Data</h3>
                     <p className="text-sm text-gray-500">Showing {data.length} points from the curve</p>
