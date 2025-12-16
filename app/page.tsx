@@ -17,6 +17,9 @@ import {
   extractDilutionColumns,
   calculateAutoMaxF
 } from './utils/csvProcessor';
+import { detectExMaxPeaks } from './utils/peakDetection';
+import ExMaxTable from './components/ExMaxTable';
+import ExMaxChart from './components/ExMaxChart';
 import { Download, AlertCircle } from 'lucide-react';
 
 export default function Home() {
@@ -79,6 +82,14 @@ export default function Home() {
     }
     return null;
   }, [rawData, factors]);
+
+  // Calculate Ex Max peaks
+  const { peaks, exMaxSeries } = useMemo(() => {
+    if (processedData && processedData.heatmapData) {
+      return detectExMaxPeaks(processedData.heatmapData);
+    }
+    return { peaks: [], exMaxSeries: [] };
+  }, [processedData]);
 
   // Handle color scale config changes with debouncing for MaxF
   const handleColorScaleChange = useCallback((newConfig: ColorScaleConfig) => {
@@ -148,17 +159,12 @@ export default function Home() {
 
         {/* Main Content Area - Only shown after upload */}
         {processedData && (
-          <>
-            {/* Correction Factors (left) and Heatmap (right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Correction Factors - Takes up 1 column */}
-              <div className="lg:col-span-1">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            {/* Left Sidebar - Settings */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg shadow p-4 space-y-6">
+                <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
                 <FactorInput factors={factors} onChange={handleFactorChange} />
-              </div>
-
-              {/* Heatmap with Color Scale Control - Takes up 3 columns */}
-              <div className="lg:col-span-3 space-y-4">
-                <Heatmap data={processedData.heatmapData} colorScaleConfig={colorScaleConfig} />
                 <ColorScaleControl
                   config={colorScaleConfig}
                   onChange={handleColorScaleChange}
@@ -167,20 +173,32 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Data Preview with Download Button */}
-            <section className="relative">
-              <div className="absolute top-4 right-4 z-10">
-                <button
-                  onClick={handleDownload}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download CSV
-                </button>
+            {/* Right Main Area - Takes up 4 columns */}
+            <div className="lg:col-span-4 space-y-4">
+              {/* Fluorescence Contour Map */}
+              <Heatmap data={processedData.heatmapData} colorScaleConfig={colorScaleConfig} />
+
+              {/* Excitation Maxima Curve and Detected Peaks */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <ExMaxChart exMaxSeries={exMaxSeries} peaks={peaks} />
+                <ExMaxTable peaks={peaks} />
               </div>
-              <DataPreview data={processedData.tableData} />
-            </section>
-          </>
+
+              {/* Processed Data Preview with Download Button */}
+              <section className="relative">
+                <div className="absolute top-4 right-4 z-10">
+                  <button
+                    onClick={handleDownload}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download CSV
+                  </button>
+                </div>
+                <DataPreview data={processedData.tableData} />
+              </section>
+            </div>
+          </div>
         )}
       </div>
     </div>
