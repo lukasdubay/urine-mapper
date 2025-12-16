@@ -37,7 +37,7 @@ export default function FileUpload({ onFileSelect }: FileUploadProps) {
         <div
             onDrop={handleDrop}
             onDragOver={handleDragOver}
-            className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-blue-500 transition-colors cursor-pointer bg-gray-50"
+            className="border-1 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-blue-500 transition-colors cursor-pointer bg-gray-50"
         >
             <input
                 type="file"

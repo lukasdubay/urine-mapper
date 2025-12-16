@@ -133,7 +133,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <header className="text-center">
           <h1 className="text-4xl font-semibold text-gray-900">Urine Fluorescence Heatmap</h1>
@@ -189,7 +189,7 @@ export default function Home() {
                 <div className="absolute top-4 right-4 z-10">
                   <button
                     onClick={handleDownload}
-                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download CSV
